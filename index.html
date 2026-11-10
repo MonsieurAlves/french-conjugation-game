@@ -1,0 +1,548 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conjugaison Quest</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #edf3f3;
+  font-family: Arial, sans-serif;
+  color: #193c56;
+}
+
+main {
+  max-width: 650px;
+  margin: 25px auto;
+  padding: 15px;
+}
+
+header {
+  background: #193c56;
+  color: white;
+  text-align: center;
+  padding: 30px 20px;
+  border-radius: 15px;
+}
+
+header h1 {
+  font: bold 38px Georgia, serif;
+  margin: 10px 0;
+}
+
+header p { margin: 0; }
+
+.card {
+  background: white;
+  border: 1px solid #dce4e7;
+  border-radius: 15px;
+  padding: 25px;
+  margin-top: 20px;
+  box-shadow: 0 5px 15px #193c5615;
+}
+
+h2 {
+  font-family: Georgia, serif;
+  margin-top: 0;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin: 15px 0 7px;
+}
+
+select, input {
+  width: 100%;
+  font: inherit;
+  padding: 13px;
+  border: 2px solid #b7c9d1;
+  border-radius: 9px;
+  background: white;
+  color: #193c56;
+}
+
+input {
+  text-align: center;
+  font-size: 27px;
+  margin: 12px 0;
+}
+
+button {
+  background: #193c56;
+  color: white;
+  border: 0;
+  border-radius: 9px;
+  padding: 14px 20px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  min-height: 46px;
+}
+
+button:hover { background: #316381; }
+
+button:focus-visible, input:focus-visible,
+select:focus-visible {
+  outline: 3px solid #d6a354;
+  outline-offset: 2px;
+}
+
+.full { width: 100%; }
+
+.hidden { display: none !important; }
+
+.stats {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.stat {
+  flex: 1;
+  background: #e9f1f5;
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+}
+
+.stat strong {
+  display: block;
+  font-size: 23px;
+}
+
+.stat span {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.question {
+  background: #fff8ef;
+  border-left: 5px solid #bf5761;
+  text-align: center;
+  border-radius: 10px;
+  padding: 25px 12px;
+}
+
+.infinitive {
+  font: bold 44px Georgia, serif;
+  margin: 10px 0;
+}
+
+.subject {
+  font-size: 27px;
+  font-weight: bold;
+}
+
+.feedback {
+  padding: 17px;
+  border-radius: 10px;
+  margin-top: 17px;
+  line-height: 1.6;
+}
+
+.correct {
+  background: #e1f3e7;
+  border: 1px solid #8ec6a5;
+}
+
+.incorrect {
+  background: #ffeded;
+  border: 1px solid #e3a8ad;
+}
+
+.progress {
+  height: 9px;
+  background: #e5edf0;
+  border-radius: 9px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+#bar {
+  height: 100%;
+  width: 0%;
+  background: #238284;
+  transition: width .25s;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.actions button { flex: 1; }
+
+.small {
+  font-size: 13px;
+  color: #586d78;
+}
+
+footer {
+  text-align: center;
+  font-size: 12px;
+  color: #586d78;
+  margin: 20px 0;
+}
+
+@media(max-width:450px) {
+  .card { padding: 17px; }
+  .infinitive { font-size: 35px; }
+  .stats { gap: 5px; }
+  .stat { padding: 9px 4px; }
+}
+</style>
+</head>
+
+<body>
+<main>
+
+<header>
+  <p style="letter-spacing:3px;font-size:12px;">
+    FRENCH VERB PRACTICE
+  </p>
+  <h1>Conjugaison Quest</h1>
+  <p>Read the subject and infinitive. Type the correct form.</p>
+</header>
+
+<!-- SETTINGS SCREEN -->
+
+<section id="setup" class="card">
+
+  <h2>Ready to Practice?</h2>
+
+  <p>
+    Practice regular present-tense
+    <strong>-ER verbs</strong>.
+    Type each answer and receive immediate feedback.
+  </p>
+
+  <label for="level">Choose your subjects</label>
+  <select id="level">
+    <option value="starter">
+      Starter: je, tu, il, elle
+    </option>
+    <option value="all">
+      All subjects
+    </option>
+  </select>
+
+  <label for="length">Number of questions</label>
+  <select id="length">
+    <option value="10">10 questions</option>
+    <option value="20">20 questions</option>
+    <option value="30">30 questions</option>
+  </select>
+
+  <p class="small">
+    Verbs include aimer, parler, jouer, regarder,
+    écouter, dessiner, danser, chanter,
+    travailler, and étudier.
+  </p>
+
+  <button id="start" class="full">
+    Start Practice
+  </button>
+
+</section>
+
+<!-- GAME SCREEN -->
+
+<section id="game" class="card hidden">
+
+  <div class="stats">
+    <div class="stat">
+      <strong id="counter">1 / 10</strong>
+      <span>QUESTION</span>
+    </div>
+    <div class="stat">
+      <strong id="score">0</strong>
+      <span>CORRECT</span>
+    </div>
+    <div class="stat">
+      <strong id="streak">0</strong>
+      <span>STREAK</span>
+    </div>
+  </div>
+
+  <div class="progress">
+    <div id="bar"></div>
+  </div>
+
+  <div class="question">
+    <div class="small">INFINITIVE</div>
+    <div id="verb" class="infinitive">parler</div>
+    <div id="subject" class="subject">nous ______</div>
+  </div>
+
+  <form id="answerForm">
+    <label for="answer" style="text-align:center;">
+      Type the conjugated verb
+    </label>
+
+    <input
+      id="answer"
+      type="text"
+      placeholder="Your answer"
+      autocomplete="off"
+      autocapitalize="off"
+      autocorrect="off"
+      spellcheck="false"
+      required
+    >
+
+    <p class="small" style="text-align:center;">
+      Press Enter or click Check Answer.
+    </p>
+
+    <button id="check" type="submit" class="full">
+      Check Answer
+    </button>
+
+    <button id="next" type="button"
+      class="full hidden">
+      Next Question
+    </button>
+  </form>
+
+  <div id="feedback"
+    class="feedback hidden"
+    role="status"
+    aria-live="polite">
+  </div>
+
+</section>
+
+<!-- RESULTS SCREEN -->
+
+<section id="end" class="card hidden"
+  style="text-align:center;">
+
+  <h2>Practice Complete!</h2>
+  <p id="results" style="font-size:29px;font-weight:bold;"></p>
+  <p id="message"></p>
+
+  <div class="actions">
+    <button id="again">Play Again</button>
+    <button id="settings">Settings</button>
+  </div>
+
+</section>
+
+<footer>
+  Independent French practice · No login or data collection
+</footer>
+
+</main>
+
+<script>
+const verbs = [
+  "aimer", "parler", "jouer", "regarder",
+  "écouter", "dessiner", "danser", "chanter",
+  "travailler", "étudier"
+];
+
+const subjects = [
+  ["je", "e"],
+  ["tu", "es"],
+  ["il", "e"],
+  ["elle", "e"],
+  ["nous", "ons"],
+  ["vous", "ez"],
+  ["ils", "ent"],
+  ["elles", "ent"]
+];
+
+const $ = id => document.getElementById(id);
+
+let questions = [];
+let index = 0;
+let score = 0;
+let streak = 0;
+let answered = false;
+
+function shuffle(array) {
+  let copy = [...array];
+
+  for (let i = copy.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+
+  return copy;
+}
+
+function makeQuestions() {
+  const selected =
+    $("level").value === "starter"
+    ? subjects.slice(0, 4)
+    : subjects;
+
+  const pool = verbs.flatMap(verb =>
+    selected.map(([pronoun, ending]) => ({
+      verb,
+      pronoun,
+      ending,
+      answer: verb.slice(0, -2) + ending
+    }))
+  );
+
+  return shuffle(pool).slice(
+    0,
+    Number($("length").value)
+  );
+}
+
+function showScreen(id) {
+  ["setup", "game", "end"].forEach(name => {
+    $(name).classList.toggle("hidden", name !== id);
+  });
+}
+
+function startGame() {
+  questions = makeQuestions();
+  index = 0;
+  score = 0;
+  streak = 0;
+  showScreen("game");
+  showQuestion();
+}
+
+function showQuestion() {
+  answered = false;
+
+  const q = questions[index];
+
+  $("counter").textContent =
+    (index + 1) + " / " + questions.length;
+
+  $("score").textContent = score;
+  $("streak").textContent = streak;
+
+  $("bar").style.width =
+    (index / questions.length * 100) + "%";
+
+  $("verb").textContent = q.verb;
+  $("subject").textContent =
+    q.pronoun + " ______";
+
+  $("answer").value = "";
+  $("answer").disabled = false;
+
+  $("check").classList.remove("hidden");
+  $("next").classList.add("hidden");
+  $("feedback").className = "feedback hidden";
+  $("feedback").textContent = "";
+
+  $("answer").focus();
+}
+
+function normalize(text) {
+  return text.trim().toLocaleLowerCase("fr")
+    .normalize("NFC");
+}
+
+function checkAnswer() {
+  if (answered) return;
+
+  const typed = $("answer").value.trim();
+  if (!typed) return;
+
+  answered = true;
+
+  const q = questions[index];
+  const correct =
+    normalize(typed) === normalize(q.answer);
+
+  if (correct) {
+    score++;
+    streak++;
+  } else {
+    streak = 0;
+  }
+
+  $("score").textContent = score;
+  $("streak").textContent = streak;
+
+  const feedback = $("feedback");
+
+  feedback.className =
+    "feedback " + (correct ? "correct" : "incorrect");
+
+  const heading = document.createElement("strong");
+  heading.textContent = correct
+    ? "Correct!"
+    : "Not quite!";
+
+  const explanation = document.createElement("p");
+  explanation.textContent =
+    q.pronoun + " + " + q.verb +
+    " → " + q.pronoun + " " + q.answer +
+    " (ending: -" + q.ending + ")";
+
+  feedback.replaceChildren(heading, explanation);
+
+  $("answer").disabled = true;
+  $("check").classList.add("hidden");
+  $("next").classList.remove("hidden");
+
+  $("next").textContent =
+    index === questions.length - 1
+    ? "See Results"
+    : "Next Question";
+
+  $("next").focus();
+}
+
+function nextQuestion() {
+  index++;
+
+  if (index >= questions.length) {
+    finishGame();
+  } else {
+    showQuestion();
+  }
+}
+
+function finishGame() {
+  showScreen("end");
+
+  $("results").textContent =
+    score + " / " + questions.length + " correct";
+
+  const percentage = score / questions.length;
+
+  $("message").textContent =
+    percentage === 1
+    ? "Perfect round!"
+    : percentage >= 0.8
+    ? "Strong work! Try another round."
+    : "Keep practicing. Every round builds accuracy.";
+}
+
+$("start").addEventListener("click", startGame);
+
+$("answerForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  if (!answered) {
+    checkAnswer();
+  } else {
+    nextQuestion();
+  }
+});
+
+$("next").addEventListener("click", nextQuestion);
+$("again").addEventListener("click", startGame);
+$("settings").addEventListener("click", () => {
+  showScreen("setup");
+});
+</script>
+
+</body>
+</html>
