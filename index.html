@@ -159,6 +159,35 @@ select:focus-visible {
 .timer-panel { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #e9f1f5; border-radius: 10px; margin-bottom: 16px; font-weight: bold; }
 .timer-panel strong { font-size: 25px; font-variant-numeric: tabular-nums; }
 .timer-panel.low-time { background: #ffeded; color: #a02131; }
+.avatar-reaction {
+  display:flex; align-items:center; gap:14px; padding:12px;
+  background:#edf5f6; border:1px solid #dce4e7;
+  border-radius:12px; margin:16px 0;
+}
+.avatar-reaction img {
+  width:115px; height:150px; flex-shrink:0;
+  object-fit:contain; object-position:bottom;
+  border-radius:9px;
+}
+.avatar-reaction .avatar-message {
+  flex:1; font-weight:bold; line-height:1.45; font-size:16px;
+}
+.avatar-reaction .avatar-message small {
+  display:block; margin-top:5px; font-size:12px;
+  font-weight:normal; color:#586d78;
+}
+.avatar-reaction.avatar-active img { animation: avatar-pop .35s ease-out; }
+@keyframes avatar-pop {
+  from { transform:scale(.94); opacity:.7; }
+  to { transform:scale(1); opacity:1; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .avatar-reaction.avatar-active img { animation:none; }
+}
+@media(max-width:450px) {
+  .avatar-reaction img { width:90px; height:118px; }
+  .avatar-reaction .avatar-message { font-size:14px; }
+}
 .progress {
   height: 9px;
   background: #e5edf0;
@@ -256,6 +285,13 @@ footer {
     travailler, and étudier.
   </p>
 
+  <div id="avatarSetup" class="avatar-reaction">
+    <img id="avatarSetupImage" src="assets/welcome.webp" alt="" onerror="this.style.display='none'">
+    <div class="avatar-message">Salut ! Prêt(e) à conjuguer ?
+      <small>Let's practice together.</small>
+    </div>
+  </div>
+
   <button id="start" class="full">
     Start Practice
   </button>
@@ -287,6 +323,13 @@ footer {
   </div>
   <div class="progress">
     <div id="bar"></div>
+  </div>
+
+  <div id="avatarGame" class="avatar-reaction" aria-live="polite" aria-atomic="true">
+    <img id="avatarImage" src="assets/thinking.webp" alt="" onerror="this.style.display='none'">
+    <div id="avatarMessage" class="avatar-message">Take your time.
+      <small>Look at the subject and think about the ending.</small>
+    </div>
   </div>
 
   <div class="question">
@@ -342,6 +385,12 @@ footer {
   <p id="results" style="font-size:29px;font-weight:bold;"></p>
   <p id="message"></p>
   <p id="timeResults" class="small"></p>
+  <div id="avatarEnd" class="avatar-reaction">
+    <img id="avatarEndImage" src="assets/complete.webp" alt="" onerror="this.style.display='none'">
+    <div class="avatar-message">Bravo ! Great effort!
+      <small>Every round helps you grow.</small>
+    </div>
+  </div>
 
   <div class="actions">
     <button id="again">Play Again</button>
@@ -381,6 +430,38 @@ let index = 0;
 let score = 0;
 let streak = 0;
 let answered = false;
+const avatarLines = {
+  thinking: ["Take your time.", "Look carefully at the subject.", "You know the pattern!"],
+  correct: ["Bravo ! Bien joué !", "Excellent !", "Très bien !"],
+  incorrect: ["Pas tout à fait. Check the ending.", "Good effort! Review the subject.", "Keep going. Look for the pattern."],
+  streak: ["Excellent ! Keep it going!", "You're on a roll!", "Quelle série !"],
+  timeWarning: ["Finish strong!", "Courage ! You've got this."]
+};
+let avatarTurn = 0;
+let avatarTimeout = null;
+function setAvatar(state, detail = "") {
+  const img = $("avatarImage");
+  const msg = $("avatarMessage");
+  if (!img || !msg) return;
+  const lines = avatarLines[state] || avatarLines.thinking;
+  const line = lines[avatarTurn++ % lines.length];
+  if (img.dataset.state !== state) {
+    img.dataset.state = state;
+    img.style.display = "";
+    img.src = "assets/" + state + ".webp";
+  }
+  msg.replaceChildren(document.createTextNode(line));
+  if (detail) {
+    const hint = document.createElement("small");
+    hint.textContent = detail;
+    msg.appendChild(hint);
+  }
+  const box = $("avatarGame");
+  box.classList.remove("avatar-active");
+  void box.offsetWidth;
+  box.classList.add("avatar-active");
+}
+
 let timerId = null;
 let timerMode = "off";
 let startedAt = 0;
@@ -401,6 +482,9 @@ function updateTimer() {
   const countdown = timerMode !== "stopwatch";
   $("timerDisplay").textContent = formatTime(countdown ? remaining : elapsedSeconds);
   $("timerPanel").classList.toggle("low-time", countdown && remaining <= 15);
+  if (countdown && remaining === 15 && !answered) {
+    setAvatar("timeWarning");
+  }
   if (countdown && remaining === 0) finishGame(true);
 }
 function startTimer() {
@@ -493,6 +577,7 @@ function showQuestion() {
   $("feedback").className = "feedback hidden";
   $("feedback").textContent = "";
 
+  setAvatar("thinking", "Read the subject carefully.");
   $("answer").focus();
 }
 
@@ -522,6 +607,12 @@ function checkAnswer() {
 
   $("score").textContent = score;
   $("streak").textContent = streak;
+  if (correct) {
+    setAvatar([3, 5, 7, 10, 15, 20, 25, 30].includes(streak) ? "streak" : "correct",
+      streak >= 3 ? streak + " correct in a row!" : "Keep practicing!");
+  } else {
+    setAvatar("incorrect", "The explanation below shows the correct form.");
+  }
 
   const feedback = $("feedback");
 
