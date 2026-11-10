@@ -156,6 +156,9 @@ select:focus-visible {
   border: 1px solid #e3a8ad;
 }
 
+.timer-panel { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #e9f1f5; border-radius: 10px; margin-bottom: 16px; font-weight: bold; }
+.timer-panel strong { font-size: 25px; font-variant-numeric: tabular-nums; }
+.timer-panel.low-time { background: #ffeded; color: #a02131; }
 .progress {
   height: 9px;
   background: #e5edf0;
@@ -239,6 +242,14 @@ footer {
     <option value="30">30 questions</option>
   </select>
 
+  <label for="timerMode">Timer</label>
+  <select id="timerMode">
+    <option value="off">No timer (relaxed practice)</option>
+    <option value="stopwatch">Stopwatch (track my time)</option>
+    <option value="120">2-minute countdown challenge</option>
+    <option value="300">5-minute countdown challenge</option>
+  </select>
+  <p class="small">Countdown challenges stop when time runs out.</p>
   <p class="small">
     Verbs include aimer, parler, jouer, regarder,
     écouter, dessiner, danser, chanter,
@@ -270,6 +281,10 @@ footer {
     </div>
   </div>
 
+  <div id="timerPanel" class="timer-panel hidden" role="timer" aria-label="Game time">
+    <span id="timerLabel">TIME</span>
+    <strong id="timerDisplay">0:00</strong>
+  </div>
   <div class="progress">
     <div id="bar"></div>
   </div>
@@ -326,6 +341,7 @@ footer {
   <h2>Practice Complete!</h2>
   <p id="results" style="font-size:29px;font-weight:bold;"></p>
   <p id="message"></p>
+  <p id="timeResults" class="small"></p>
 
   <div class="actions">
     <button id="again">Play Again</button>
@@ -365,6 +381,42 @@ let index = 0;
 let score = 0;
 let streak = 0;
 let answered = false;
+let timerId = null;
+let timerMode = "off";
+let startedAt = 0;
+let totalSeconds = 0;
+let elapsedSeconds = 0;
+function formatTime(seconds) {
+  const n = Math.max(0, Math.floor(seconds));
+  return Math.floor(n / 60) + ":" + String(n % 60).padStart(2, "0");
+}
+function stopTimer() {
+  if (timerId !== null) clearInterval(timerId);
+  timerId = null;
+}
+function updateTimer() {
+  if (timerMode === "off") return;
+  elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
+  const remaining = Math.max(0, totalSeconds - elapsedSeconds);
+  const countdown = timerMode !== "stopwatch";
+  $("timerDisplay").textContent = formatTime(countdown ? remaining : elapsedSeconds);
+  $("timerPanel").classList.toggle("low-time", countdown && remaining <= 15);
+  if (countdown && remaining === 0) finishGame(true);
+}
+function startTimer() {
+  stopTimer();
+  timerMode = $("timerMode").value;
+  totalSeconds = timerMode === "off" || timerMode === "stopwatch" ? 0 : Number(timerMode);
+  elapsedSeconds = 0;
+  $("timerPanel").classList.toggle("hidden", timerMode === "off");
+  $("timerPanel").classList.remove("low-time");
+  $("timerLabel").textContent = timerMode === "stopwatch" ? "TIME ELAPSED" : "TIME REMAINING";
+  if (timerMode !== "off") {
+    startedAt = Date.now();
+    updateTimer();
+    timerId = setInterval(updateTimer, 250);
+  }
+}
 
 function shuffle(array) {
   let copy = [...array];
@@ -405,12 +457,14 @@ function showScreen(id) {
 }
 
 function startGame() {
+  stopTimer();
   questions = makeQuestions();
   index = 0;
   score = 0;
   streak = 0;
   showScreen("game");
   showQuestion();
+  startTimer();
 }
 
 function showQuestion() {
@@ -509,16 +563,22 @@ function nextQuestion() {
   }
 }
 
-function finishGame() {
+function finishGame(timeExpired = false) {
+  if (timerMode !== "off") elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
+  stopTimer();
   showScreen("end");
 
-  $("results").textContent =
-    score + " / " + questions.length + " correct";
+  const completed = timeExpired ? index + (answered ? 1 : 0) : questions.length;
+  $("results").textContent = score + " / " + questions.length + " correct";
+  $("timeResults").textContent = timerMode === "off" ? "" :
+    (timeExpired ? "Time's up! " : "") + "Time: " + formatTime(elapsedSeconds) +
+    " · Questions completed: " + completed + " / " + questions.length;
 
   const percentage = score / questions.length;
 
-  $("message").textContent =
-    percentage === 1
+  $("message").textContent = timeExpired
+    ? "Challenge complete! Try again to improve your accuracy."
+    : percentage === 1
     ? "Perfect round!"
     : percentage >= 0.8
     ? "Strong work! Try another round."
@@ -540,6 +600,7 @@ $("answerForm").addEventListener("submit", event => {
 $("next").addEventListener("click", nextQuestion);
 $("again").addEventListener("click", startGame);
 $("settings").addEventListener("click", () => {
+  stopTimer();
   showScreen("setup");
 });
 </script>
