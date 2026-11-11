@@ -7,227 +7,103 @@
 <title>Conjugaison Quest</title>
 
 <style>
-* { box-sizing: border-box; }
 
-body {
-  margin: 0;
-  background: #edf3f3;
-  font-family: Arial, sans-serif;
-  color: #193c56;
+:root { --navy:#193F5B; --navy-deep:#10344D; --coral:#FF746B; --coral-dark:#E9595E; --mint:#85DDCA; --mint-dark:#35BBAF; --cream:#FFF9F3; --gold:#FFD17A; --ink:#193F5B; --shadow:0 18px 36px rgba(25,63,91,.11),0 4px 11px rgba(25,63,91,.07); }
+* { box-sizing:border-box; }
+body { margin:0; font-family: "Trebuchet MS",Arial,sans-serif; color:var(--ink); background:radial-gradient(circle at 0% 85%,rgba(255,116,107,.19),transparent 22%), radial-gradient(circle at 100% 96%,rgba(133,221,202,.37),transparent 24%),var(--cream); min-height:100vh; }
+main { max-width:1040px; margin:0 auto; padding:0 22px 30px; }
+header { position:relative; isolation:isolate; overflow:hidden; background:linear-gradient(120deg,#196784,#193F5B 68%,#247F9E); color:white; text-align:center; border-radius:0 0 42px 42px; padding:30px 20px 34px; box-shadow:var(--shadow); }
+header::before { content:""; position:absolute; z-index:-1; left:-8%; top:-70px; width:320px; height:215px; background:radial-gradient(ellipse,#80dcd6a8,transparent 70%); transform:rotate(-22deg); }
+header::after { content:""; position:absolute; z-index:-1; right:-30px; bottom:-10px; height:90px; width:240px; opacity:.3; background:linear-gradient(transparent 50%,#66bfd1 50%); clip-path:polygon(0 100%,0 55%,14% 55%,14% 30%,20% 30%,20% 65%,35% 65%,35% 20%,42% 20%,42% 60%,55% 60%,55% 40%,65% 40%,65% 55%,76% 55%,76% 10%,83% 10%,83% 60%,100% 60%,100% 100%); }
+header h1 { font-size:clamp(34px,5vw,59px); line-height:1.06; letter-spacing:-1.8px; margin:0 0 12px; font-weight:900; text-shadow:0 4px 1px rgba(0,0,0,.14); }
+header h1 span { color:#FF8F83; }
+header p { margin:0; }
+.hero-pill { display:inline-block; background:linear-gradient(120deg,#DAFFF3,#A7EADF); border-radius:999px; box-shadow:0 6px 12px rgba(0,0,0,.13); color:var(--navy); padding:9px 21px; font-size:13px; letter-spacing:1.1px; font-weight:800; text-transform:uppercase; }
+.hero-subtitle { margin-top:13px; font-size:14px; opacity:.88; }
+.card { background:rgba(255,255,255,.93); border:1px solid rgba(255,255,255,.95); border-radius:30px; padding:28px; margin:22px auto 0; box-shadow:var(--shadow); }
+#setup,#end { max-width:700px; }
+h2 { margin:0 0 15px; font-size:29px; letter-spacing:-.7px; }
+label { display:block; font-size:14px; font-weight:800; margin:16px 0 7px; }
+select,input { width:100%; font:inherit; color:var(--ink); border:2px solid #DDE8EB; background:#FFFFFF; border-radius:18px; padding:14px 17px; box-shadow:inset 0 2px 4px #193f5b08; }
+select { cursor:pointer; }
+input { text-align:center; font-size:25px; margin:9px 0 0; }
+input:disabled { background:#EFF6F6; }
+button { font:800 16px "Trebuchet MS",Arial,sans-serif; min-height:51px; padding:13px 23px; border:0; border-radius:999px; background:linear-gradient(135deg,#FF927B,#FF746B 58%,#F05C66); color:white; cursor:pointer; box-shadow:0 8px 16px rgba(235,93,99,.23),inset 0 2px 2px #ffffff8c; transition:transform .16s, box-shadow .16s,filter .16s; }
+button:hover:not(:disabled) { transform:translateY(-2px); filter:saturate(1.08); box-shadow:0 11px 20px rgba(235,93,99,.27); }
+button:active:not(:disabled) { transform:translateY(0); }
+button:disabled { opacity:.6; cursor:not-allowed; }
+button.secondary { color:var(--ink); background:linear-gradient(125deg,#FFFFFF,#FFF4EC); box-shadow:0 5px 12px #193f5b19,inset 0 2px #fff; }
+button.help { color:var(--navy); background:linear-gradient(130deg,#D8FFF2,#8AE0CD); box-shadow:0 6px 15px #35bbaF38,inset 0 2px #ffffff8c; }
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible { outline:3px solid #E09A22; outline-offset:3px; }
+.full { width:100%; } .hidden { display:none !important; }
+.stats { display:flex; gap:14px; margin:0 0 15px; }
+.stat { flex:1; min-width:0; padding:13px 11px; display:flex; gap:9px; align-items:center; justify-content:center; background:linear-gradient(#fff,#FFF5EE); box-shadow:0 6px 16px rgba(25,63,91,.09); border-radius:999px; }
+.stat strong { display:block; font-size:22px; white-space:nowrap; }
+.stat span { display:block; font-size:11px; line-height:1.2; font-weight:800; text-transform:uppercase; }
+.stat .stat-icon { font-size:24px; line-height:1; }
+.progress { height:13px; padding:3px; background:#E4EAF0; border-radius:999px; box-shadow:inset 0 2px 5px #193f5b15; margin:0 0 18px; overflow:hidden; }
+#bar { width:0%; height:100%; border-radius:999px; background:linear-gradient(90deg,#FF9B75,#FF746B,#F15D6D); transition:width .3s ease; }
+.timer-panel { display:flex; align-items:center; justify-content:center; gap:12px; font-weight:800; margin-bottom:15px; }
+.timer-panel strong { font-size:22px; font-variant-numeric:tabular-nums; }
+.timer-panel.low-time { color:#B13340; }
+.game-layout { display:grid; grid-template-columns:minmax(0,190px) minmax(0,1fr); gap:18px; align-items:center; }
+.avatar-reaction { display:flex; align-items:center; gap:12px; background:linear-gradient(145deg,#E8FFF9,#FFFFFF); border:1px solid #C3F0E4; border-radius:25px; padding:13px; margin:15px 0; }
+.avatar-reaction img { width:104px; height:125px; object-fit:contain; object-position:bottom; flex-shrink:0; }
+.avatar-reaction .avatar-message { line-height:1.4; font-weight:800; font-size:15px; }
+.avatar-reaction .avatar-message small { display:block; font-size:12px; color:#547687; font-weight:500; margin-top:7px; }
+#avatarGame { flex-direction:column; align-self:start; text-align:center; margin:5px 0; padding:12px 10px; }
+#avatarGame img { width:min(100%,160px); height:170px; }
+#avatarGame .avatar-message { font-size:15px; }
+.avatar-reaction.avatar-active img { animation:avatar-pop .35s ease-out; }
+@keyframes avatar-pop { from{transform:translateY(5px) scale(.94);opacity:.7} to{transform:translateY(0) scale(1);opacity:1} }
+.question-card { padding:24px clamp(14px,4vw,34px) 26px; border-radius:32px; background:linear-gradient(140deg,#FFFFFF 20%,#FFF9F3 100%); box-shadow:0 8px 25px #193f5b15; border:1px solid #fff; }
+.question { text-align:center; padding:8px 8px 17px; }
+.question .small { display:inline-block; background:linear-gradient(135deg,#D9FFF2,#91E5D4); padding:8px 25px; border-radius:999px; font-size:12px; letter-spacing:2px; font-weight:900; }
+.infinitive { font-size:clamp(43px,6vw,69px); font-weight:900; letter-spacing:-1.5px; background:linear-gradient(120deg,#DDF8F4,#D3F1E9); border-radius:100px; padding:10px 15px; margin:12px auto 13px; max-width:370px; }
+.subject { font-size:clamp(32px,4.8vw,51px); font-weight:900; letter-spacing:-1px; }
+.answer-caption { margin:8px 0 4px; font-size:12px; font-weight:700; color:#597789; text-align:center; }
+#answerForm label { text-align:center; }
+#answer { border-color:var(--mint-dark); box-shadow:0 4px 12px #35bbaF16; }
+#answerForm button { margin-top:13px; }
+.feedback { padding:14px 17px; border-radius:17px; margin:17px 0 0; line-height:1.5; font-size:14px; }
+.feedback p { margin:8px 0 0; }
+.correct { background:#E7FAEF; border:1px solid #9FDEC0; }
+.incorrect { background:#FFF1E9; border:1px solid #F5BFAB; }
+.game-tools { display:flex; gap:11px; margin:18px auto 0; justify-content:center; }
+.game-tools button { flex:1; max-width:240px; }
+.actions { display:flex; flex-wrap:wrap; gap:10px; }
+.actions button { flex:1; }
+.help-panel { padding:17px 20px; border-radius:23px; background:#E8FAF4; border:1px solid #B4EBDD; margin-top:14px; }
+.help-panel h3 { margin:0 0 7px; font-size:19px; }
+.help-panel p { margin:8px 0; font-size:14px; }
+.ending-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin:12px 0 0; }
+.ending-grid span { text-align:center; background:white; padding:10px 5px; border-radius:12px; font-size:13px; }
+.small { color:#597789; font-size:13px; line-height:1.5; }
+footer { text-align:center; color:#597789; font-size:12px; margin:24px 0; }
+@media(max-width:710px) {
+ main { padding:0 12px 24px; }
+ header { border-radius:0 0 28px 28px; padding:25px 12px 27px; }
+ .card { padding:18px; border-radius:24px; }
+ .game-layout { grid-template-columns:1fr; gap:8px; }
+ #avatarGame { flex-direction:row; text-align:left; align-items:center; padding:8px 12px; margin:0; }
+ #avatarGame img { width:82px; height:95px; }
+ .stats { gap:6px; }
+ .stat { border-radius:17px; padding:10px 5px; flex-direction:column; gap:3px; }
+ .stat strong { font-size:20px; }
+ .stat span { font-size:9px; text-align:center; }
+ .stat .stat-icon { font-size:17px; }
+ .question-card { padding:14px; border-radius:23px; }
+ .game-tools button { padding:11px 8px; font-size:14px; min-height:45px; }
 }
-
-main {
-  max-width: 650px;
-  margin: 25px auto;
-  padding: 15px;
-}
-
-header {
-  background: #193c56;
-  color: white;
-  text-align: center;
-  padding: 30px 20px;
-  border-radius: 15px;
-}
-
-header h1 {
-  font: bold 38px Georgia, serif;
-  margin: 10px 0;
-}
-
-header p { margin: 0; }
-
-.card {
-  background: white;
-  border: 1px solid #dce4e7;
-  border-radius: 15px;
-  padding: 25px;
-  margin-top: 20px;
-  box-shadow: 0 5px 15px #193c5615;
-}
-
-h2 {
-  font-family: Georgia, serif;
-  margin-top: 0;
-}
-
-label {
-  display: block;
-  font-weight: bold;
-  margin: 15px 0 7px;
-}
-
-select, input {
-  width: 100%;
-  font: inherit;
-  padding: 13px;
-  border: 2px solid #b7c9d1;
-  border-radius: 9px;
-  background: white;
-  color: #193c56;
-}
-
-input {
-  text-align: center;
-  font-size: 27px;
-  margin: 12px 0;
-}
-
-button {
-  background: #193c56;
-  color: white;
-  border: 0;
-  border-radius: 9px;
-  padding: 14px 20px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
-  min-height: 46px;
-}
-
-button:hover { background: #316381; }
-
-button:focus-visible, input:focus-visible,
-select:focus-visible {
-  outline: 3px solid #d6a354;
-  outline-offset: 2px;
-}
-
-.full { width: 100%; }
-
-.hidden { display: none !important; }
-
-.stats {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.stat {
-  flex: 1;
-  background: #e9f1f5;
-  border-radius: 10px;
-  padding: 12px;
-  text-align: center;
-}
-
-.stat strong {
-  display: block;
-  font-size: 23px;
-}
-
-.stat span {
-  font-size: 12px;
-  font-weight: bold;
-}
-
-.question {
-  background: #fff8ef;
-  border-left: 5px solid #bf5761;
-  text-align: center;
-  border-radius: 10px;
-  padding: 25px 12px;
-}
-
-.infinitive {
-  font: bold 44px Georgia, serif;
-  margin: 10px 0;
-}
-
-.subject {
-  font-size: 27px;
-  font-weight: bold;
-}
-
-.feedback {
-  padding: 17px;
-  border-radius: 10px;
-  margin-top: 17px;
-  line-height: 1.6;
-}
-
-.correct {
-  background: #e1f3e7;
-  border: 1px solid #8ec6a5;
-}
-
-.incorrect {
-  background: #ffeded;
-  border: 1px solid #e3a8ad;
-}
-
-.timer-panel { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #e9f1f5; border-radius: 10px; margin-bottom: 16px; font-weight: bold; }
-.timer-panel strong { font-size: 25px; font-variant-numeric: tabular-nums; }
-.timer-panel.low-time { background: #ffeded; color: #a02131; }
-.avatar-reaction {
-  display:flex; align-items:center; gap:14px; padding:12px;
-  background:#edf5f6; border:1px solid #dce4e7;
-  border-radius:12px; margin:16px 0;
-}
-.avatar-reaction img {
-  width:115px; height:150px; flex-shrink:0;
-  object-fit:contain; object-position:bottom;
-  border-radius:9px;
-}
-.avatar-reaction .avatar-message {
-  flex:1; font-weight:bold; line-height:1.45; font-size:16px;
-}
-.avatar-reaction .avatar-message small {
-  display:block; margin-top:5px; font-size:12px;
-  font-weight:normal; color:#586d78;
-}
-.avatar-reaction.avatar-active img { animation: avatar-pop .35s ease-out; }
-@keyframes avatar-pop {
-  from { transform:scale(.94); opacity:.7; }
-  to { transform:scale(1); opacity:1; }
+@media(max-width:380px) {
+ header h1 { font-size:32px; }
+ .avatar-reaction img { width:80px; height:100px; }
+ .ending-grid { grid-template-columns:repeat(2,1fr); }
 }
 @media(prefers-reduced-motion:reduce) {
-  .avatar-reaction.avatar-active img { animation:none; }
-}
-@media(max-width:450px) {
-  .avatar-reaction img { width:90px; height:118px; }
-  .avatar-reaction .avatar-message { font-size:14px; }
-}
-.progress {
-  height: 9px;
-  background: #e5edf0;
-  border-radius: 9px;
-  overflow: hidden;
-  margin-bottom: 20px;
+ *,*::before,*::after { animation:none !important; transition:none !important; }
 }
 
-#bar {
-  height: 100%;
-  width: 0%;
-  background: #238284;
-  transition: width .25s;
-}
-
-.actions {
-  display: flex;
-  gap: 10px;
-}
-
-.actions button { flex: 1; }
-
-.small {
-  font-size: 13px;
-  color: #586d78;
-}
-
-footer {
-  text-align: center;
-  font-size: 12px;
-  color: #586d78;
-  margin: 20px 0;
-}
-
-@media(max-width:450px) {
-  .card { padding: 17px; }
-  .infinitive { font-size: 35px; }
-  .stats { gap: 5px; }
-  .stat { padding: 9px 4px; }
-}
 </style>
 </head>
 
@@ -235,11 +111,9 @@ footer {
 <main>
 
 <header>
-  <p style="letter-spacing:3px;font-size:12px;">
-    FRENCH VERB PRACTICE
-  </p>
-  <h1>Conjugaison Quest</h1>
-  <p>Read the subject and infinitive. Type the correct form.</p>
+  <h1>Conjugaison <span>Quest</span></h1>
+  <p class="hero-pill">French Verb Practice</p>
+  <p class="hero-subtitle">Build your skills, one verb at a time.</p>
 </header>
 
 <!-- SETTINGS SCREEN -->
@@ -304,16 +178,16 @@ footer {
 
   <div class="stats">
     <div class="stat">
-      <strong id="counter">1 / 10</strong>
-      <span>QUESTION</span>
+      <div class="stat-icon" aria-hidden="true">🎯</div>
+      <div><strong id="counter">1 / 10</strong><span>QUESTION</span></div>
     </div>
     <div class="stat">
-      <strong id="score">0</strong>
-      <span>CORRECT</span>
+      <div class="stat-icon" aria-hidden="true">🏆</div>
+      <div><strong id="score">0</strong><span>CORRECT</span></div>
     </div>
     <div class="stat">
-      <strong id="streak">0</strong>
-      <span>FIRST-TRY STREAK</span>
+      <div class="stat-icon" aria-hidden="true">🔥</div>
+      <div><strong id="streak">0</strong><span>FIRST-TRY STREAK</span></div>
     </div>
   </div>
 
@@ -325,6 +199,7 @@ footer {
     <div id="bar"></div>
   </div>
 
+  <div class="game-layout">
   <div id="avatarGame" class="avatar-reaction" aria-live="polite" aria-atomic="true">
     <img id="avatarImage" src="assets/thinking.webp" alt="" onerror="this.style.display='none'">
     <div id="avatarMessage" class="avatar-message">Take your time.
@@ -332,6 +207,7 @@ footer {
     </div>
   </div>
 
+  <div class="question-card">
   <div class="question">
     <div class="small">INFINITIVE</div>
     <div id="verb" class="infinitive">parler</div>
@@ -354,9 +230,7 @@ footer {
       required
     >
 
-    <p class="small" style="text-align:center;">
-      Press Enter or click Check Answer.
-    </p>
+    <p class="answer-caption">Press Enter or click Check Answer</p>
 
     <button id="check" type="submit" class="full">
       Check Answer
@@ -373,7 +247,23 @@ footer {
     role="status"
     aria-live="polite">
   </div>
-
+  </div>
+  </div>
+  <div class="game-tools">
+    <button id="helpButton" class="help" type="button" aria-expanded="false" aria-controls="helpPanel">📖 Help</button>
+    <button id="passButton" class="secondary" type="button">➜ Pass</button>
+  </div>
+  <div id="helpPanel" class="help-panel hidden">
+    <h3>Regular -ER Verb Guide</h3>
+    <p>Remove <strong>-er</strong> from the infinitive and add the ending that matches the subject.</p>
+    <div class="ending-grid">
+      <span><strong>je</strong> → -e</span><span><strong>tu</strong> → -es</span>
+      <span><strong>il / elle</strong> → -e</span><span><strong>nous</strong> → -ons</span>
+      <span><strong>vous</strong> → -ez</span><span><strong>ils / elles</strong> → -ent</span>
+    </div>
+    <p><strong>Example:</strong> parler → nous parlons</p>
+    <p class="small">Using Help doesn't affect your score. The goal is learning!</p>
+  </div>
 </section>
 
 <!-- RESULTS SCREEN -->
@@ -385,6 +275,7 @@ footer {
   <p id="results" style="font-size:29px;font-weight:bold;"></p>
   <p id="message"></p>
   <p id="attemptResults" class="small"></p>
+  <p id="passResults" class="small"></p>
   <p id="timeResults" class="small"></p>
   <div id="avatarEnd" class="avatar-reaction">
     <img id="avatarEndImage" src="assets/complete.webp" alt="" onerror="this.style.display='none'">
@@ -435,6 +326,7 @@ let attempts = 0;
 let firstTryCorrect = 0;
 let recovered = 0;
 let missed = 0;
+let passed = 0;
 const avatarLines = {
   thinking: ["Take your time.", "Look carefully at the subject.", "You know the pattern!"],
   correct: ["Bravo ! Bien joué !", "Excellent !", "Très bien !"],
@@ -554,6 +446,8 @@ function startGame() {
   firstTryCorrect = 0;
   recovered = 0;
   missed = 0;
+  passed = 0;
+  hideHelp();
   showScreen("game");
   showQuestion();
   startTimer();
@@ -561,6 +455,7 @@ function startGame() {
 
 function showQuestion() {
   answered = false;
+  hideHelp();
   attempts = 0;
 
   const q = questions[index];
@@ -584,6 +479,7 @@ function showQuestion() {
   $("check").classList.remove("hidden");
   $("check").textContent = "Check Answer";
   $("next").classList.add("hidden");
+  $("passButton").textContent = "➜ Pass";
   $("feedback").className = "feedback hidden";
   $("feedback").textContent = "";
 
@@ -674,6 +570,7 @@ function checkAnswer() {
   $("next").classList.remove("hidden");
   $("next").textContent = index === questions.length - 1
     ? "See Results" : "Next Question";
+  $("passButton").textContent = "➜ Next";
   $("next").focus();
 }
 
@@ -700,6 +597,7 @@ function finishGame(timeExpired = false) {
 
   $("attemptResults").textContent = "Correct on first try: " + firstTryCorrect +
     " · Correct after retry: " + recovered + " · Missed after two tries: " + missed;
+  $("passResults").textContent = passed ? "Passed questions: " + passed : "";
   const percentage = score / questions.length;
 
   $("message").textContent = timeExpired
@@ -711,6 +609,24 @@ function finishGame(timeExpired = false) {
     : "Keep practicing. Every round builds accuracy.";
 }
 
+function hideHelp() {
+  $("helpPanel").classList.add("hidden");
+  $("helpButton").setAttribute("aria-expanded", "false");
+}
+$("helpButton").addEventListener("click", () => {
+  const showing = $("helpPanel").classList.toggle("hidden");
+  $("helpButton").setAttribute("aria-expanded", String(!showing));
+});
+$("passButton").addEventListener("click", () => {
+  if (answered) {
+    nextQuestion();
+    return;
+  }
+  // A pass ends this question without credit and without penalizing the error counts.
+  passed++;
+  streak = 0;
+  nextQuestion();
+});
 $("start").addEventListener("click", startGame);
 
 $("answerForm").addEventListener("submit", event => {
