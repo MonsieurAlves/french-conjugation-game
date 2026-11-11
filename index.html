@@ -251,7 +251,7 @@ footer {
   <p>
     Practice regular present-tense
     <strong>-ER verbs</strong>.
-    Type each answer and receive immediate feedback.
+    You get a hint and a second chance if your first answer is incorrect.
   </p>
 
   <label for="level">Choose your subjects</label>
@@ -313,7 +313,7 @@ footer {
     </div>
     <div class="stat">
       <strong id="streak">0</strong>
-      <span>STREAK</span>
+      <span>FIRST-TRY STREAK</span>
     </div>
   </div>
 
@@ -384,6 +384,7 @@ footer {
   <h2>Practice Complete!</h2>
   <p id="results" style="font-size:29px;font-weight:bold;"></p>
   <p id="message"></p>
+  <p id="attemptResults" class="small"></p>
   <p id="timeResults" class="small"></p>
   <div id="avatarEnd" class="avatar-reaction">
     <img id="avatarEndImage" src="assets/complete.webp" alt="" onerror="this.style.display='none'">
@@ -430,6 +431,10 @@ let index = 0;
 let score = 0;
 let streak = 0;
 let answered = false;
+let attempts = 0;
+let firstTryCorrect = 0;
+let recovered = 0;
+let missed = 0;
 const avatarLines = {
   thinking: ["Take your time.", "Look carefully at the subject.", "You know the pattern!"],
   correct: ["Bravo ! Bien joué !", "Excellent !", "Très bien !"],
@@ -546,6 +551,9 @@ function startGame() {
   index = 0;
   score = 0;
   streak = 0;
+  firstTryCorrect = 0;
+  recovered = 0;
+  missed = 0;
   showScreen("game");
   showQuestion();
   startTimer();
@@ -553,6 +561,7 @@ function startGame() {
 
 function showQuestion() {
   answered = false;
+  attempts = 0;
 
   const q = questions[index];
 
@@ -573,6 +582,7 @@ function showQuestion() {
   $("answer").disabled = false;
 
   $("check").classList.remove("hidden");
+  $("check").textContent = "Check Answer";
   $("next").classList.add("hidden");
   $("feedback").className = "feedback hidden";
   $("feedback").textContent = "";
@@ -592,55 +602,78 @@ function checkAnswer() {
   const typed = $("answer").value.trim();
   if (!typed) return;
 
-  answered = true;
+  attempts++;
 
   const q = questions[index];
   const correct =
     normalize(typed) === normalize(q.answer);
 
+  const feedback = $("feedback");
+  if (!correct && attempts === 1) {
+    // First miss: give a targeted hint without revealing the answer.
+    streak = 0;
+    $("streak").textContent = streak;
+    setAvatar("incorrect", "Try once more. You can do this!");
+    feedback.className = "feedback incorrect";
+    const heading = document.createElement("strong");
+    heading.textContent = "Not quite. Try again!";
+    const hint = document.createElement("p");
+    const endings = {
+      je: "-e", tu: "-es", il: "-e", elle: "-e",
+      nous: "-ons", vous: "-ez", ils: "-ent", elles: "-ent"
+    };
+    hint.textContent = "Hint: " + q.pronoun + " takes the ending " +
+      endings[q.pronoun] + ". Remove -er from the infinitive, then add the ending.";
+    feedback.replaceChildren(heading, hint);
+    $("answer").value = "";
+    $("answer").focus();
+    $("check").textContent = "Check Second Attempt";
+    return;
+  }
+
+  answered = true;
   if (correct) {
     score++;
-    streak++;
+    if (attempts === 1) {
+      firstTryCorrect++;
+      streak++;
+    } else {
+      recovered++;
+      // A recovery is valuable, but doesn't restore a first-try streak.
+      streak = 0;
+    }
   } else {
+    missed++;
     streak = 0;
   }
 
   $("score").textContent = score;
   $("streak").textContent = streak;
   if (correct) {
-    setAvatar([3, 5, 7, 10, 15, 20, 25, 30].includes(streak) ? "streak" : "correct",
-      streak >= 3 ? streak + " correct in a row!" : "Keep practicing!");
+    setAvatar(attempts === 1 && [3, 5, 7, 10, 15, 20, 25, 30].includes(streak)
+      ? "streak" : "correct",
+      attempts === 2 ? "You found it on your second try!" :
+      streak >= 3 ? streak + " first-try answers in a row!" : "Keep practicing!");
   } else {
-    setAvatar("incorrect", "The explanation below shows the correct form.");
+    setAvatar("incorrect", "You made two attempts. Review the explanation below.");
   }
 
-  const feedback = $("feedback");
-
-  feedback.className =
-    "feedback " + (correct ? "correct" : "incorrect");
-
+  feedback.className = "feedback " + (correct ? "correct" : "incorrect");
   const heading = document.createElement("strong");
   heading.textContent = correct
-    ? "Correct!"
-    : "Not quite!";
-
+    ? (attempts === 2 ? "Nice recovery!" : "Correct!")
+    : "Good effort! Here's the pattern.";
   const explanation = document.createElement("p");
-  explanation.textContent =
-    q.pronoun + " + " + q.verb +
+  explanation.textContent = q.pronoun + " + " + q.verb +
     " → " + q.pronoun + " " + q.answer +
     " (ending: -" + q.ending + ")";
-
   feedback.replaceChildren(heading, explanation);
 
   $("answer").disabled = true;
   $("check").classList.add("hidden");
   $("next").classList.remove("hidden");
-
-  $("next").textContent =
-    index === questions.length - 1
-    ? "See Results"
-    : "Next Question";
-
+  $("next").textContent = index === questions.length - 1
+    ? "See Results" : "Next Question";
   $("next").focus();
 }
 
@@ -665,6 +698,8 @@ function finishGame(timeExpired = false) {
     (timeExpired ? "Time's up! " : "") + "Time: " + formatTime(elapsedSeconds) +
     " · Questions completed: " + completed + " / " + questions.length;
 
+  $("attemptResults").textContent = "Correct on first try: " + firstTryCorrect +
+    " · Correct after retry: " + recovered + " · Missed after two tries: " + missed;
   const percentage = score / questions.length;
 
   $("message").textContent = timeExpired
